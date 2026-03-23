@@ -10,15 +10,27 @@ Project for collecting, analyzing, and visualizing StackOverflow data, specifica
 - `tests/`: Project test suite.
 - `diary/`: Record of AI interactions.
 
-## Setup
+## Usage
 
 This project uses `uv` for dependency management.
+
+### Setup
 
 ```bash
 uv sync
 ```
 
-## Running Tests
+### Running the Application
+
+To fetch data (or load from cache) and generate the visualization:
+
+```bash
+uv run python -m so_challenge.main
+```
+
+The resulting plot will be saved as `so_questions_plot.png`.
+
+### Running Tests
 
 ```bash
 uv run pytest
