@@ -20,8 +20,8 @@ def fetch_data(cache_path=None, retries=3, delay=1):
         return pd.read_csv(cache_path)
 
     # Note: In a real implementation, we would construct the API query for 2008-2024.
-    # For now, we follow the structure expected by the tests.
-    url = "https://api.stackexchange.com/2.3/questions"
+    # The Stack Exchange API requires a 'site' parameter.
+    url = "https://api.stackexchange.com/2.3/questions?site=stackoverflow"
     
     for i in range(retries):
         try:
@@ -31,6 +31,20 @@ def fetch_data(cache_path=None, retries=3, delay=1):
             
             df = pd.DataFrame(data.get("items", []))
             
+            # If we're hitting the real API, we need to transform creation_date to year_month
+            if not df.empty and 'creation_date' in df.columns:
+                df['year_month'] = pd.to_datetime(df['creation_date'], unit='s').dt.to_period('M').astype(str)
+                df = df.groupby('year_month').size().reset_index(name='question_count')
+            
+            # Final column check
+            for col in ['year_month', 'question_count']:
+                if col not in df.columns:
+                    df[col] = pd.Series(dtype='object')
+            
+            if cache_path:
+                df.to_csv(cache_path, index=False)
+            
+            return df
             if cache_path:
                 df.to_csv(cache_path, index=False)
             
